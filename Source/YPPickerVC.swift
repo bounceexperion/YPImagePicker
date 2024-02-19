@@ -311,6 +311,9 @@ open class YPPickerVC: YPBottomPager, YPBottomPagerDelegate {
         if let libraryVC = libraryVC {
             libraryVC.mediaManager.forseCancelExporting()
         }
+        if let videoVC = videoVC {
+            videoVC.videoHelper.cancelledRecording = true
+        }
         self.didClose?()
     }
     
@@ -379,9 +382,21 @@ extension YPPickerVC: YPLibraryViewDelegate {
     
     public func libraryViewHaveNoItems() {
         pickerVCDelegate?.libraryHasNoItems()
+        self.libraryVC?.v.hideLoader()
+        self.showNoPhotosAlert()
     }
     
     public func libraryViewShouldAddToSelection(indexPath: IndexPath, numSelections: Int) -> Bool {
         return pickerVCDelegate?.shouldAddToSelection(indexPath: indexPath, numSelections: numSelections) ?? true
     }
+}
+
+extension YPPickerVC {
+    //    Alert to be shown if no image is available in library
+        public func showNoPhotosAlert() {
+            let alert = UIAlertController(title:YPConfig.noPhotosErrorTitle , message: YPConfig.noPhotosErrorMessage, preferredStyle: .alert)
+            let okAction = UIAlertAction(title:  YPConfig.noPhotosAlertButtonTitle, style: .default, handler: { _ in })
+            alert.addAction(okAction)
+            self.present(alert, animated: true, completion: nil)
+        }
 }

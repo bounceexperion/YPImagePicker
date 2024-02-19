@@ -29,7 +29,7 @@ internal final class YPPhotoCaptureHelper: NSObject {
     private var isCaptureSessionSetup: Bool = false
     private var isPreviewSetup: Bool = false
     private var previewView: UIView!
-    private var videoLayer: AVCaptureVideoPreviewLayer!
+    var videoLayer: AVCaptureVideoPreviewLayer!
     private var block: ((Data) -> Void)?
     private var initVideoZoomFactor: CGFloat = 1.0
 }
@@ -203,6 +203,9 @@ private extension YPPhotoCaptureHelper {
         DispatchQueue.main.async {
             self.videoLayer.frame = self.previewView.bounds
             self.videoLayer.videoGravity = AVLayerVideoGravity.resizeAspectFill
+            if UIDevice.current.userInterfaceIdiom == .pad {
+                self.videoLayer.connection?.videoOrientation = YPHelper.transformOrientation(orientation: UIInterfaceOrientation(rawValue: UIApplication.shared.statusBarOrientation.rawValue)!)
+            }
             self.previewView.layer.addSublayer(self.videoLayer)
         }
     }

@@ -41,12 +41,16 @@ public class YPMediaVideo {
     public var url: URL
     public let fromCamera: Bool
     public var asset: PHAsset?
-
-    public init(thumbnail: UIImage, videoURL: URL, fromCamera: Bool = false, asset: PHAsset? = nil) {
-        self.thumbnail = thumbnail
-        self.url = videoURL
+    public var assetIdentifier: String?
+    public var cropRect: CGRect?
+    
+    public init(thumbnail: UIImage?, videoURL: URL?, fromCamera: Bool = false, asset: PHAsset? = nil, assetIdentifier: String? = nil, cropRect: CGRect? = nil) {
+        self.thumbnail = thumbnail ?? UIImage()
+        self.url = videoURL ?? URL(fileURLWithPath: "")
         self.fromCamera = fromCamera
         self.asset = asset
+        self.assetIdentifier = assetIdentifier
+        self.cropRect = cropRect
     }
 }
 

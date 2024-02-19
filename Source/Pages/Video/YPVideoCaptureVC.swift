@@ -11,7 +11,7 @@ import UIKit
 internal class YPVideoCaptureVC: UIViewController, YPPermissionCheckable {
     var didCaptureVideo: ((URL) -> Void)?
     
-    private let videoHelper = YPVideoCaptureHelper()
+    let videoHelper = YPVideoCaptureHelper()
     private let v = YPCameraView(overlayView: nil)
     private var viewState = ViewState()
     
@@ -235,6 +235,18 @@ internal class YPVideoCaptureVC: UIViewController, YPPermissionCheckable {
             }
         } else {
             return .noFlash
+        }
+    }
+}
+
+extension YPVideoCaptureVC {
+    public override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            coordinator.animate(alongsideTransition: { (context) -> Void in
+                self.videoHelper.videoLayer?.connection?.videoOrientation = YPHelper.transformOrientation(orientation: UIInterfaceOrientation(rawValue: UIApplication.shared.statusBarOrientation.rawValue)!)
+            }, completion: { (context) -> Void in
+                super.viewWillTransition(to: size, with: coordinator)
+            })
         }
     }
 }

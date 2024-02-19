@@ -152,11 +152,6 @@ internal final class YPCameraVC: UIViewController, UIGestureRecognizerDelegate, 
             if YPConfig.onlySquareImagesFromCamera {
                 image = self.cropImageToSquare(image)
             }
-
-            // Flip image if taken form the front camera.
-            if let device = self.photoCapture.device, device.position == .front {
-                image = self.flipImage(image: image)
-            }
             
             let noOrietationImage = image.resetOrientation()
             
@@ -214,6 +209,19 @@ internal final class YPCameraVC: UIViewController, UIGestureRecognizerDelegate, 
             let flashImage = self.photoCapture.currentFlashMode.flashImage()
             self.v.flashButton.setImage(flashImage, for: .normal)
             self.v.flashButton.isHidden = !self.photoCapture.hasFlash
+        }
+    }
+}
+
+extension YPCameraVC {
+    public override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            coordinator.animate(alongsideTransition: { (context) -> Void in
+                self.photoCapture.videoLayer?.connection?.videoOrientation = YPHelper.transformOrientation(orientation: UIInterfaceOrientation(rawValue: UIApplication.shared.statusBarOrientation.rawValue)!)
+                //            self.prevLayer?.frame.size = self.myView.frame.size
+            }, completion: { (context) -> Void in
+                super.viewWillTransition(to: size, with: coordinator)
+            })
         }
     }
 }

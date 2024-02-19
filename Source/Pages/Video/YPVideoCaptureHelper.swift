@@ -30,7 +30,8 @@ class YPVideoCaptureHelper: NSObject {
     private var previewView: UIView!
     private var motionManager = CMMotionManager()
     private var initVideoZoomFactor: CGFloat = 1.0
-    
+    var videoLayer: AVCaptureVideoPreviewLayer!
+    var cancelledRecording = false
     // MARK: - Init
     
     public func start(previewView: UIView, withVideoRecordingLimit: TimeInterval, completion: @escaping () -> Void) {
@@ -300,6 +301,9 @@ class YPVideoCaptureHelper: NSObject {
         DispatchQueue.main.async {
             videoLayer.frame = self.previewView.bounds
             videoLayer.videoGravity = AVLayerVideoGravity.resizeAspectFill
+            if UIDevice.current.userInterfaceIdiom == .pad {
+                self.videoLayer.connection?.videoOrientation = YPHelper.transformOrientation(orientation: UIInterfaceOrientation(rawValue: UIApplication.shared.statusBarOrientation.rawValue)!)
+            }
             self.previewView.layer.addSublayer(videoLayer)
         }
     }
@@ -325,9 +329,18 @@ extension YPVideoCaptureHelper: AVCaptureFileOutputRecordingDelegate {
         if let error = error {
             ypLog("Error: \(error)")
         }
-
+        if cancelledRecording {
+            cancelledRecording = false
+            timer.invalidate()
+            return
+        }
         if YPConfig.onlySquareImagesFromCamera {
+            let indicator = YPLoaders.fullScreenLoader
+            UIApplication.shared.keyWindow?.addSubview(indicator)
             YPVideoProcessor.cropToSquare(filePath: outputFileURL) { [weak self] url in
+                DispatchQueue.main.async {
+                    indicator.removeFromSuperview()
+                }
                 guard let _self = self, let u = url else { return }
                 _self.didCaptureVideo?(u)
             }
