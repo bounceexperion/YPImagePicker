@@ -237,8 +237,7 @@ class YPVideoCaptureHelper: NSObject {
                 videoOutput.maxRecordedFileSize = sizeLimit
             }
             videoOutput.minFreeDiskSpaceLimit = YPConfig.video.minFreeDiskSpaceLimit
-            if YPConfig.video.fileType == .mp4,
-               YPConfig.video.recordingSizeLimit != nil {
+            if YPConfig.video.fileType == .mp4 {
                 videoOutput.movieFragmentInterval = .invalid // Allows audio for MP4s over 10 seconds.
             }
             if session.canAddOutput(videoOutput) {
@@ -297,14 +296,14 @@ class YPVideoCaptureHelper: NSObject {
     }
     
     func setupPreview() {
-        let videoLayer = AVCaptureVideoPreviewLayer(session: session)
+        self.videoLayer = AVCaptureVideoPreviewLayer(session: session)
         DispatchQueue.main.async {
-            videoLayer.frame = self.previewView.bounds
-            videoLayer.videoGravity = AVLayerVideoGravity.resizeAspectFill
+            self.videoLayer.frame = self.previewView.bounds
+            self.videoLayer.videoGravity = AVLayerVideoGravity.resizeAspectFill
             if UIDevice.current.userInterfaceIdiom == .pad {
                 self.videoLayer.connection?.videoOrientation = YPHelper.transformOrientation(orientation: UIInterfaceOrientation(rawValue: UIApplication.shared.statusBarOrientation.rawValue)!)
             }
-            self.previewView.layer.addSublayer(videoLayer)
+            self.previewView.layer.addSublayer(self.videoLayer)
         }
     }
 }
